@@ -1,17 +1,11 @@
 #pragma once
 
-class Room {
-public:
-    Room();
-    ~Room();
+#include "gfx/Mesh.h"
 
-    Room(const Room&) = delete;
-    Room& operator=(const Room&) = delete;
+namespace Room {
 
-    void draw() const;
+MeshData createFloor();
+MeshData createWalls();
+MeshData createWindowFrame();
 
-private:
-    unsigned int vao = 0;
-    unsigned int vbo = 0;
-    int vertexCount = 0;
-};
+}

@@ -22,6 +22,9 @@ public:
     glm::vec3 getPosition() const;
     Mode getMode() const;
 
+    void getRay(float ndcX, float ndcY, float aspect,
+                glm::vec3& origin, glm::vec3& direction) const;
+
 private:
     glm::vec3 getFront() const;
 

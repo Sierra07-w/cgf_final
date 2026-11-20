@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 Camera::Camera()
@@ -126,4 +127,21 @@ glm::vec3 Camera::getFront() const {
     return glm::vec3(cosPitch * std::cos(yawRadians),
                      std::sin(pitchRadians),
                      cosPitch * std::sin(yawRadians));
+}
+
+void Camera::getRay(float ndcX, float ndcY, float aspect,
+                    glm::vec3& origin, glm::vec3& direction) const {
+    const glm::mat4 inverseProjection = glm::inverse(getProjectionMatrix(aspect));
+    const glm::mat4 inverseView = glm::inverse(getViewMatrix());
+
+    glm::vec4 nearPoint = inverseProjection * glm::vec4(ndcX, ndcY, -1.0f, 1.0f);
+    glm::vec4 farPoint = inverseProjection * glm::vec4(ndcX, ndcY, 1.0f, 1.0f);
+    nearPoint /= nearPoint.w;
+    farPoint /= farPoint.w;
+
+    const glm::vec4 nearWorld = inverseView * nearPoint;
+    const glm::vec4 farWorld = inverseView * farPoint;
+
+    origin = glm::vec3(nearWorld);
+    direction = glm::normalize(glm::vec3(farWorld) - origin);
 }

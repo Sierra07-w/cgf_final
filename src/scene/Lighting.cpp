@@ -18,10 +18,10 @@ void applyPointLight(const Shader& shader, const std::string& name, const PointL
 }
 
 Lighting::Lighting()
-    : ambientColor(0.18f, 0.16f, 0.14f) {
+    : ambientColor(0.32f, 0.30f, 0.28f) {
     windowLight.direction = glm::vec3(0.15f, -0.45f, 1.0f);
-    windowLight.color = glm::vec3(0.55f, 0.72f, 0.95f);
-    windowLight.intensity = 0.9f;
+    windowLight.color = glm::vec3(0.62f, 0.78f, 1.0f);
+    windowLight.intensity = 1.1f;
 
     deskLamp.position = glm::vec3(1.6f, 1.6f, -1.5f);
     deskLamp.color = glm::vec3(1.0f, 0.6f, 0.3f);
@@ -31,8 +31,8 @@ Lighting::Lighting()
     deskLamp.quadratic = 0.07f;
 
     fillLight.position = glm::vec3(-1.5f, 2.8f, 1.5f);
-    fillLight.color = glm::vec3(0.55f, 0.6f, 0.75f);
-    fillLight.intensity = 0.7f;
+    fillLight.color = glm::vec3(0.7f, 0.78f, 0.92f);
+    fillLight.intensity = 0.85f;
     fillLight.constant = 1.0f;
     fillLight.linear = 0.09f;
     fillLight.quadratic = 0.032f;

@@ -12,52 +12,32 @@
 #include <imgui_impl_opengl3.h>
 
 #include "gfx/Shader.h"
+#include "gfx/Texture.h"
 #include "scene/Camera.h"
 #include "scene/Lighting.h"
-#include "scene/Room.h"
+#include "scene/Scene.h"
 
 namespace {
-
-constexpr float twoPi = 6.2831853f;
 
 Camera camera;
 Lighting lighting;
 Material roomMaterial;
+SceneOptions sceneOptions;
 
 bool showPanel = false;
 bool firstMouse = true;
 bool dragging = false;
+bool leftWasDown = false;
+double clickX = 0.0;
+double clickY = 0.0;
 float lastX = 640.0f;
 float lastY = 360.0f;
-
-struct AnimationState {
-    bool catBreathing = true;
-    bool cupSteam = true;
-    bool rain = true;
-    float catPhase = 0.0f;
-    float steamPhase = 0.0f;
-    float rainPhase = 0.0f;
-};
-
-AnimationState animations;
 
 void updateCursorMode(GLFWwindow* window) {
     const bool captureMouse = camera.getMode() == Camera::Mode::Free && !showPanel;
     glfwSetInputMode(window, GLFW_CURSOR,
                      captureMouse ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
     firstMouse = true;
-}
-
-void updateAnimations(float deltaTime) {
-    if (animations.catBreathing) {
-        animations.catPhase = std::fmod(animations.catPhase + deltaTime * 1.2f, twoPi);
-    }
-    if (animations.cupSteam) {
-        animations.steamPhase = std::fmod(animations.steamPhase + deltaTime * 0.7f, twoPi);
-    }
-    if (animations.rain) {
-        animations.rainPhase = std::fmod(animations.rainPhase + deltaTime * 3.5f, twoPi);
-    }
 }
 
 void framebufferSizeCallback(GLFWwindow*, int width, int height) {
@@ -81,6 +61,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
     if (key == GLFW_KEY_F5) {
         showPanel = !showPanel;
         updateCursorMode(window);
+    }
+
+    if (key == GLFW_KEY_B) {
+        sceneOptions.ballRolling = !sceneOptions.ballRolling;
     }
 }
 
@@ -130,29 +114,29 @@ void buildUi(GLFWwindow* window) {
 
     ImGui::Begin("Cozy Room", &showPanel);
 
-    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
     ImGui::Text("Camera: %s", camera.getMode() == Camera::Mode::Free ? "Free" : "Orbit");
     ImGui::Text("Tab changes camera, F5 closes this panel");
 
     ImGui::Separator();
-    ImGui::Text("Animations");
+    ImGui::Text("Scene");
 
-    ImGui::Checkbox("Cat breathing", &animations.catBreathing);
-    ImGui::ProgressBar(animations.catPhase / twoPi, ImVec2(0.0f, 0.0f), "");
+    ImGui::Checkbox("Rain", &sceneOptions.rainOn);
+    ImGui::Checkbox("Desk lamp", &sceneOptions.lampOn);
+    ImGui::Checkbox("Lamp flicker", &sceneOptions.flicker);
+    ImGui::Checkbox("Day / night", &sceneOptions.dayNightOn);
+    ImGui::SliderFloat("Day speed", &sceneOptions.dayCycleSpeed, 0.01f, 0.2f);
 
-    ImGui::Checkbox("Cup steam", &animations.cupSteam);
-    ImGui::ProgressBar(animations.steamPhase / twoPi, ImVec2(0.0f, 0.0f), "");
-
-    ImGui::Checkbox("Rain", &animations.rain);
-    ImGui::ProgressBar(animations.rainPhase / twoPi, ImVec2(0.0f, 0.0f), "");
+    if (ImGui::Button(sceneOptions.ballRolling ? "Stop ball" : "Roll ball")) {
+        sceneOptions.ballRolling = !sceneOptions.ballRolling;
+    }
+    ImGui::SliderFloat("Ball speed", &sceneOptions.ballSpeed, 0.4f, 4.0f);
 
     ImGui::Separator();
     ImGui::Text("Lighting");
 
-    ImGui::SliderFloat("Desk lamp", &lighting.deskLamp.intensity, 0.0f, 5.0f);
     ImGui::SliderFloat("Window light", &lighting.windowLight.intensity, 0.0f, 2.0f);
-    ImGui::SliderFloat("Fill light", &lighting.fillLight.intensity, 0.0f, 2.0f);
     ImGui::ColorEdit3("Ambient", &lighting.ambientColor.x);
+    ImGui::SliderFloat3("Lamp offset", &sceneOptions.lampOffset.x, -1.0f, 1.0f);
 
     ImGui::Separator();
     ImGui::Text("Material");
@@ -218,19 +202,67 @@ int main() {
     {
         const std::string shaderPath = std::string(SHADER_DIR);
         Shader shader(shaderPath + "/vertex.vert", shaderPath + "/fragment.frag");
-        Room room;
+        Texture texture;
+        Scene scene;
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         double previousTime = glfwGetTime();
+        double elapsedTime = 0.0;
 
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
             const double currentTime = glfwGetTime();
             const float deltaTime =
                 std::min(static_cast<float>(currentTime - previousTime), 0.1f);
             previousTime = currentTime;
+            elapsedTime += deltaTime;
 
-            updateAnimations(deltaTime);
+            scene.update(deltaTime, static_cast<float>(elapsedTime), lighting, sceneOptions);
+
+            const int leftState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+            if (leftState == GLFW_PRESS && !leftWasDown) {
+                leftWasDown = true;
+                glfwGetCursorPos(window, &clickX, &clickY);
+            } else if (leftState == GLFW_RELEASE && leftWasDown) {
+                leftWasDown = false;
+
+                double releaseX = 0.0;
+                double releaseY = 0.0;
+                glfwGetCursorPos(window, &releaseX, &releaseY);
+                const double dx = releaseX - clickX;
+                const double dy = releaseY - clickY;
+
+                int windowWidth = 0;
+                int windowHeight = 0;
+                glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+                if (dx * dx + dy * dy < 36.0 && windowWidth > 0 && windowHeight > 0 &&
+                    !ImGui::GetIO().WantCaptureMouse) {
+                    const float ndcX =
+                        2.0f * static_cast<float>(releaseX) / windowWidth - 1.0f;
+                    const float ndcY =
+                        1.0f - 2.0f * static_cast<float>(releaseY) / windowHeight;
+
+                    int framebufferWidth = 0;
+                    int framebufferHeight = 0;
+                    glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+
+                    if (framebufferWidth > 0 && framebufferHeight > 0) {
+                        glm::vec3 rayOrigin;
+                        glm::vec3 rayDirection;
+                        camera.getRay(ndcX, ndcY,
+                                      static_cast<float>(framebufferWidth) / framebufferHeight,
+                                      rayOrigin, rayDirection);
+
+                        if (scene.pickCat(rayOrigin, rayDirection)) {
+                            scene.pokeCat();
+                            std::cout << "*growl*" << std::endl;
+                        }
+                    }
+                }
+            }
 
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -247,6 +279,41 @@ int main() {
             }
 
             buildUi(window);
+
+            const ImGuiIO& fpsIo = ImGui::GetIO();
+            const float fps = fpsIo.Framerate;
+            const ImVec4 fpsColor = fps >= 60.0f ? ImVec4(0.55f, 0.95f, 0.65f, 1.0f)
+                                     : fps >= 30.0f ? ImVec4(1.0f, 0.82f, 0.35f, 1.0f)
+                                                    : ImVec4(1.0f, 0.45f, 0.45f, 1.0f);
+
+            ImGui::SetNextWindowPos(ImVec2(fpsIo.DisplaySize.x - 16.0f, 16.0f),
+                                    ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+            ImGui::SetNextWindowBgAlpha(0.55f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 7.0f));
+            ImGui::Begin("##fps", nullptr,
+                         ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
+                         ImGuiWindowFlags_NoSavedSettings |
+                         ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav |
+                         ImGuiWindowFlags_AlwaysAutoResize);
+            ImGui::TextUnformatted("FPS");
+            ImGui::SameLine();
+            ImGui::TextColored(fpsColor, "%.1f", fps);
+            ImGui::TextDisabled("%.2f ms", fps > 0.0f ? 1000.0f / fps : 0.0f);
+            ImGui::End();
+            ImGui::PopStyleVar();
+
+            if (scene.isCatGrowling()) {
+                ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, 90.0f),
+                                        ImGuiCond_Always, ImVec2(0.5f, 0.0f));
+                ImGui::SetNextWindowBgAlpha(0.0f);
+                ImGui::Begin("##growl", nullptr,
+                             ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
+                             ImGuiWindowFlags_NoSavedSettings |
+                             ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+                ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.82f, 1.0f), "*growl*");
+                ImGui::End();
+            }
+
             ImGui::Render();
 
             int width = 0;
@@ -261,13 +328,13 @@ int main() {
                 const float aspect = static_cast<float>(width) / static_cast<float>(height);
 
                 shader.use();
-                shader.setMat4("model", glm::mat4(1.0f));
                 shader.setMat4("view", camera.getViewMatrix());
                 shader.setMat4("projection", camera.getProjectionMatrix(aspect));
                 shader.setVec3("viewPosition", camera.getPosition());
 
                 lighting.apply(shader, roomMaterial);
-                room.draw();
+                scene.draw(shader, texture);
+                scene.drawParticles(shader, texture);
             }
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -1,0 +1,43 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "clion-debug",
+      "inherits": "base",
+      "displayName": "CLion Debug"
+    },
+    {
+      "name": "clion-release",
+      "inherits": "base",
+      "displayName": "CLion Release",
+      "binaryDir": "${sourceDir}/cmake-build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "clion-debug",
+      "configurePreset": "clion-debug"
+    },
+    {
+      "name": "clion-release",
+      "configurePreset": "clion-release"
+    }
+  ]
+}
