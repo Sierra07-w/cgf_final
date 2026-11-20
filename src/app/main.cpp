@@ -331,7 +331,10 @@ int main() {
             glfwGetFramebufferSize(window, &width, &height);
             glViewport(0, 0, width, height);
 
-            glClearColor(0.08f, 0.075f, 0.07f, 1.0f);
+            const float daylight = scene.getDaylight();
+            glClearColor(0.04f + 0.58f * daylight,
+                         0.05f + 0.68f * daylight,
+                         0.10f + 0.78f * daylight, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (width > 0 && height > 0 && shader.isLoaded()) {

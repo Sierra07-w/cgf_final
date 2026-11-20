@@ -7,9 +7,9 @@ We use C++17, OpenGL 3.3 Core, GLFW, GLAD, GLM, Dear ImGui and CMake.
 
 - The room is 6 × 6 × 4 m. It has a wooden floor, cream walls and a white window. There is a bed with a pink blanket with white dots. A small white cat sleeps on the bed. We made the cat from spheres, cones and a curved tail. There is also a desk, a chair, a bookshelf, a plant, a lamp and a mug with steam. Under the window there is a pink yoga mat. Two small dumbbells are near it.
 - It rains outside the window. Leaves move. Steam goes up from the mug. The lamp can flicker. The cat breathes slowly. Three letters `Z` fly up and fade out.
-- Dust particles fly in the sun beam from the window. They are bright in the day and fade at night.
+- Light rays come from the window and turn with the sun. Dust particles fly inside the rays. The rays are bright in the day and fade at night or when the curtains are closed.
 - Curtains can close or open. Press **C** or use the **Curtains** checkbox. When they close, less light comes from the window. We made curtains instead of fairy lights.
-- There is a day and night cycle. The sun moves behind the window. The light changes too. Use **Day / night** and **Day speed** in the panel. If the cycle is off, you can set the light by hand.
+- There is a day and night cycle. The sun moves behind the window. The light changes too. The sky behind the window changes: light blue in the day, dark blue at night. Use **Day / night** and **Day speed** in the panel. If the cycle is off, you can set the light by hand.
 - The FPS counter is always in the top right corner. It is green at 60+ FPS, yellow at 30–60 and red below 30. It also shows the frame time in ms.
 - A ball rolls when you press **Roll ball** or **B**. You can change its speed with **Ball speed**. Press **Stop ball** or **B** again to stop it.
 - Click the cat. It jumps, moves its ears, opens its mouth and shows `*growl*`. Then it goes back to sleep.
@@ -103,7 +103,7 @@ We used an AI assistant for this project. The tool was OpenCode (Big Pickle).
 The AI helped us to:
 
 - check the project against the course rules;
-- write the FPS counter, the day/night cycle, the dust particles, the curtains and the build fix;
+- write the FPS counter, the day/night cycle, the sun rays, the dust particles, the curtains, the sky colour and the build fix;
 - add keys for rain and curtains;
 - move the day/night and atmosphere code into their own files;
 - write this README.

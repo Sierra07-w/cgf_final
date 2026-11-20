@@ -161,8 +161,15 @@ Scene::Scene() {
         dustMotes.push_back(makeNode(createSphere(0.024f, 8, 6,
                                                   glm::vec3(1.0f, 0.95f, 0.75f)),
                                      glm::mat4(1.0f)));
-        dustState.push_back(glm::vec3(-0.75f + (i % 4) * 0.5f, static_cast<float>(i) * 0.37f, 0.7f + (i % 3) * 0.25f));
+        dustState.push_back(glm::vec3(-0.3f + (i % 4) * 0.2f, static_cast<float>(i) * 0.37f, 0.7f + (i % 3) * 0.25f));
         dustAlphas.push_back(0.0f);
+    }
+
+    const float beamRadii[] = {0.10f, 0.16f, 0.22f};
+    for (float radius : beamRadii) {
+        beamShafts.push_back(makeNode(createCylinder(radius, 1.0f, 12, glm::vec3(1.0f, 0.92f, 0.7f)),
+                                      glm::mat4(1.0f), 0, false, glm::vec3(1.6f)));
+        beamAlphas.push_back(0.0f);
     }
 
     bed->addChild(sleepingCat);
@@ -416,29 +423,20 @@ void Scene::update(float deltaTime, float elapsedTime, Lighting& lighting,
     catMouth->setLocalMatrix(translation(0.0f, -0.052f, 0.2f) *
                              scaled(1.0f, 0.08f + mouthOpen * 0.9f, 1.0f));
 
-    for (size_t i = 0; i < zParticles.size(); ++i) {
-        const float phase = std::fmod(elapsedTime * 0.32f + zPhases[i], 1.0f);
-        const float x = -1.35f + std::sin(phase * 6.2831853f + static_cast<float>(i)) * 0.06f;
-        const float y = 1.32f + phase * 0.95f;
-        const float scale = 0.95f - phase * 0.35f;
-        zParticles[i]->setLocalMatrix(translation(x, y, 1.43f) *
-                                      scaled(scale, scale, scale));
-        zParticles[i]->updateWorld(glm::mat4(1.0f));
-        zAlphas[i] = 0.85f * (1.0f - phase) * calm;
-    }
+    updateZParticles(zParticles, zPhases, zAlphas, elapsedTime, calm);
 
-    const float lightingDaylight = updateDayNight(sunPhase, deltaTime, options.dayNightOn,
-                                                  options.dayCycleSpeed, sun, lighting);
+    glm::vec3 beamDirection(0.0f, -1.0f, 0.0f);
+    currentDaylight = updateDayNight(sunPhase, deltaTime, options.dayNightOn, options.dayCycleSpeed, sun, lighting, beamDirection);
+    updateCurtains(curtainOpen, options.curtainsClosed, deltaTime, curtainLeft, curtainRight);
+    lighting.windowLight.intensity *= 0.35f + 0.65f * curtainOpen;
+    updateSunbeams(beamShafts, beamAlphas, beamDirection, currentDaylight, curtainOpen);
+    updateDust(dustMotes, dustState, dustAlphas, elapsedTime, beamDirection, currentDaylight, curtainOpen);
+    updateRain(rainDrops, rainState, options.rainOn, deltaTime);
+    updateSteam(steamPuffs, steamState, elapsedTime);
 
     const float leafAngle = 0.25f * std::sin(elapsedTime * 0.9f);
     plantLeaf->setLocalMatrix(translation(0.22f, 1.02f, 0.0f) * rotationY(leafAngle) *
                               scaled(1.0f, 0.35f, 0.6f));
-
-    updateCurtains(curtainOpen, options.curtainsClosed, deltaTime, curtainLeft, curtainRight);
-    lighting.windowLight.intensity *= 0.35f + 0.65f * curtainOpen;
-    updateDust(dustMotes, dustState, dustAlphas, elapsedTime, lightingDaylight, curtainOpen);
-    updateRain(rainDrops, rainState, options.rainOn, deltaTime);
-    updateSteam(steamPuffs, steamState, elapsedTime);
 
     root->updateWorld(glm::mat4(1.0f));
 
@@ -449,10 +447,10 @@ void Scene::update(float deltaTime, float elapsedTime, Lighting& lighting,
         ? 0.82f + 0.18f * std::sin(elapsedTime * 17.0f) * std::sin(elapsedTime * 7.0f)
         : 1.0f;
 
-    const float lampBase = 1.3f + 1.1f * (1.0f - lightingDaylight);
+    const float lampBase = 1.3f + 1.1f * (1.0f - currentDaylight);
     lighting.deskLamp.intensity = options.lampOn ? lampBase * flicker : 0.0f;
     lighting.fillLight.intensity =
-        (options.lampOn ? 0.7f : 0.35f) * (0.55f + 0.45f * lightingDaylight);
+        (options.lampOn ? 0.7f : 0.35f) * (0.55f + 0.45f * currentDaylight);
 }
 
 bool Scene::pickCat(const glm::vec3& rayOrigin, const glm::vec3& rayDirection) const {
@@ -489,12 +487,14 @@ void Scene::draw(const Shader& shader, const Texture& texture) const {
     root->draw(shader, texture);
 }
 
+float Scene::getDaylight() const {
+    return currentDaylight;
+}
+
 void Scene::drawParticles(const Shader& shader, const Texture& texture) const {
     glDepthMask(GL_FALSE);
-    for (size_t i = 0; i < zParticles.size(); ++i) {
-        shader.setFloat("uAlpha", zAlphas[i]);
-        zParticles[i]->draw(shader, texture);
-    }
-    drawDust(shader, texture, dustMotes, dustAlphas);
+    drawWithAlpha(shader, texture, beamShafts, beamAlphas);
+    drawWithAlpha(shader, texture, dustMotes, dustAlphas);
+    drawWithAlpha(shader, texture, zParticles, zAlphas);
     glDepthMask(GL_TRUE);
 }

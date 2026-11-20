@@ -34,6 +34,7 @@ public:
     bool pickCat(const glm::vec3& rayOrigin, const glm::vec3& rayDirection) const;
     void pokeCat();
     bool isCatGrowling() const;
+    float getDaylight() const;
 
 private:
     std::shared_ptr<SceneNode> root;
@@ -51,6 +52,9 @@ private:
     std::vector<std::shared_ptr<SceneNode>> dustMotes;
     std::vector<float> dustAlphas;
     std::vector<glm::vec3> dustState;
+    std::vector<std::shared_ptr<SceneNode>> beamShafts;
+    std::vector<float> beamAlphas;
+    float currentDaylight = 1.0f;
     std::vector<std::shared_ptr<SceneNode>> rainDrops;
     std::vector<std::shared_ptr<SceneNode>> steamPuffs;
     std::vector<glm::vec3> rainState;
