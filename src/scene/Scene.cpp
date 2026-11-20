@@ -157,18 +157,9 @@ Scene::Scene() {
         zAlphas.push_back(0.0f);
     }
 
-    for (int i = 0; i < 16; ++i) {
-        dustMotes.push_back(makeNode(createSphere(0.024f, 8, 6,
-                                                  glm::vec3(1.0f, 0.95f, 0.75f)),
-                                     glm::mat4(1.0f)));
-        dustState.push_back(glm::vec3(-0.3f + (i % 4) * 0.2f, static_cast<float>(i) * 0.37f, 0.7f + (i % 3) * 0.25f));
-        dustAlphas.push_back(0.0f);
-    }
-
-    const float beamRadii[] = {0.10f, 0.16f, 0.22f};
-    for (float radius : beamRadii) {
-        beamShafts.push_back(makeNode(createCylinder(radius, 1.0f, 12, glm::vec3(1.0f, 0.92f, 0.7f)),
-                                      glm::mat4(1.0f), 0, false, glm::vec3(1.6f)));
+    for (int i = 0; i < 5; ++i) {
+        beamShafts.push_back(makeNode(createLightBand(glm::vec3(1.0f, 0.97f, 0.88f)),
+                                      glm::mat4(1.0f), 6));
         beamAlphas.push_back(0.0f);
     }
 
@@ -426,11 +417,12 @@ void Scene::update(float deltaTime, float elapsedTime, Lighting& lighting,
     updateZParticles(zParticles, zPhases, zAlphas, elapsedTime, calm);
 
     glm::vec3 beamDirection(0.0f, -1.0f, 0.0f);
-    currentDaylight = updateDayNight(sunPhase, deltaTime, options.dayNightOn, options.dayCycleSpeed, sun, lighting, beamDirection);
+    glm::vec3 rayColor(1.0f);
+    float rayStrength = 0.0f;
+    currentDaylight = updateDayNight(sunPhase, deltaTime, options.dayNightOn, options.dayCycleSpeed, sun, lighting, beamDirection, rayColor, rayStrength);
     updateCurtains(curtainOpen, options.curtainsClosed, deltaTime, curtainLeft, curtainRight);
     lighting.windowLight.intensity *= 0.35f + 0.65f * curtainOpen;
-    updateSunbeams(beamShafts, beamAlphas, beamDirection, currentDaylight, curtainOpen);
-    updateDust(dustMotes, dustState, dustAlphas, elapsedTime, beamDirection, currentDaylight, curtainOpen);
+    updateSunbeams(beamShafts, beamAlphas, beamDirection, rayColor, rayStrength, curtainOpen);
     updateRain(rainDrops, rainState, options.rainOn, deltaTime);
     updateSteam(steamPuffs, steamState, elapsedTime);
 
@@ -493,8 +485,9 @@ float Scene::getDaylight() const {
 
 void Scene::drawParticles(const Shader& shader, const Texture& texture) const {
     glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     drawWithAlpha(shader, texture, beamShafts, beamAlphas);
-    drawWithAlpha(shader, texture, dustMotes, dustAlphas);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     drawWithAlpha(shader, texture, zParticles, zAlphas);
     glDepthMask(GL_TRUE);
 }

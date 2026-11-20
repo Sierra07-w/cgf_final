@@ -19,14 +19,9 @@ void updateZParticles(const std::vector<std::shared_ptr<SceneNode>>& particles,
                       const std::vector<float>& phases, std::vector<float>& alphas,
                       float elapsedTime, float calm);
 
-void updateDust(const std::vector<std::shared_ptr<SceneNode>>& motes,
-                const std::vector<glm::vec3>& state, std::vector<float>& alphas,
-                float elapsedTime, const glm::vec3& beamDirection,
-                float daylight, float curtainOpen);
-
 void updateSunbeams(const std::vector<std::shared_ptr<SceneNode>>& shafts,
                     std::vector<float>& alphas, const glm::vec3& beamDirection,
-                    float daylight, float curtainOpen);
+                    const glm::vec3& rayColor, float rayStrength, float curtainOpen);
 
 void updateCurtains(float& open, bool closed, float deltaTime,
                     const std::shared_ptr<SceneNode>& left,

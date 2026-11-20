@@ -9,4 +9,5 @@ class SceneNode;
 
 float updateDayNight(float& phase, float deltaTime, bool enabled, float speed,
                      const std::shared_ptr<SceneNode>& sun, Lighting& lighting,
-                     glm::vec3& beamDirection);
+                     glm::vec3& beamDirection, glm::vec3& rayColor,
+                     float& rayStrength);

@@ -18,6 +18,10 @@ void SceneNode::setLocalMatrix(const glm::mat4& matrix) {
     localMatrix = matrix;
 }
 
+void SceneNode::setColorMultiplier(const glm::vec3& color) {
+    colorMultiplier = color;
+}
+
 const glm::mat4& SceneNode::getLocalMatrix() const {
     return localMatrix;
 }

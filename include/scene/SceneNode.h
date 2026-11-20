@@ -19,6 +19,7 @@ public:
     void addChild(const std::shared_ptr<SceneNode>& child);
 
     void setLocalMatrix(const glm::mat4& matrix);
+    void setColorMultiplier(const glm::vec3& color);
     const glm::mat4& getLocalMatrix() const;
     const glm::mat4& getWorldMatrix() const;
 

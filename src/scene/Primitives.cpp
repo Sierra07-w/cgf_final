@@ -205,3 +205,42 @@ MeshData createCone(float radius, float height, int segments, const glm::vec3& c
 
     return data;
 }
+
+MeshData createLightBand(const glm::vec3& color) {
+    MeshData data;
+
+    const float topHalfWidth = 0.35f;
+    const float topHalfDepth = 0.12f;
+    const float bottomHalfWidth = 0.50f;
+    const float bottomHalfDepth = 0.18f;
+    const glm::vec3 dim = color * 0.65f;
+    const glm::vec3 frontNormal(0.0f, 0.0f, 1.0f);
+    const glm::vec3 backNormal(0.0f, 0.0f, -1.0f);
+
+    data.vertices.push_back({{-topHalfWidth, 0.5f, topHalfDepth}, frontNormal, {0.0f, 1.0f}, color});
+    data.vertices.push_back({{ topHalfWidth, 0.5f, topHalfDepth}, frontNormal, {1.0f, 1.0f}, color});
+    data.vertices.push_back({{ topHalfWidth, 0.5f, -topHalfDepth}, backNormal, {1.0f, 1.0f}, color});
+    data.vertices.push_back({{-topHalfWidth, 0.5f, -topHalfDepth}, backNormal, {0.0f, 1.0f}, color});
+
+    data.vertices.push_back({{-bottomHalfWidth, -0.5f, bottomHalfDepth}, frontNormal, {0.0f, 0.0f}, dim});
+    data.vertices.push_back({{ bottomHalfWidth, -0.5f, bottomHalfDepth}, frontNormal, {1.0f, 0.0f}, dim});
+    data.vertices.push_back({{ bottomHalfWidth, -0.5f, -bottomHalfDepth}, backNormal, {1.0f, 0.0f}, dim});
+    data.vertices.push_back({{-bottomHalfWidth, -0.5f, -bottomHalfDepth}, backNormal, {0.0f, 0.0f}, dim});
+
+    data.indices.push_back(0); data.indices.push_back(1); data.indices.push_back(5);
+    data.indices.push_back(0); data.indices.push_back(5); data.indices.push_back(4);
+
+    data.indices.push_back(1); data.indices.push_back(2); data.indices.push_back(6);
+    data.indices.push_back(1); data.indices.push_back(6); data.indices.push_back(5);
+
+    data.indices.push_back(2); data.indices.push_back(3); data.indices.push_back(7);
+    data.indices.push_back(2); data.indices.push_back(7); data.indices.push_back(6);
+
+    data.indices.push_back(3); data.indices.push_back(0); data.indices.push_back(4);
+    data.indices.push_back(3); data.indices.push_back(4); data.indices.push_back(7);
+
+    data.indices.push_back(0); data.indices.push_back(1); data.indices.push_back(2);
+    data.indices.push_back(0); data.indices.push_back(2); data.indices.push_back(3);
+
+    return data;
+}

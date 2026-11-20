@@ -42,16 +42,13 @@ private:
     float ballPhase = 0.0f;
     std::shared_ptr<SceneNode> lampShade;
     std::shared_ptr<SceneNode> sun;
-    float sunPhase = 0.0f;
+    float sunPhase = 0.5f;
     std::shared_ptr<SceneNode> plantLeaf;
     std::shared_ptr<SceneNode> rainRoot;
     std::shared_ptr<SceneNode> steamRoot;
     std::shared_ptr<SceneNode> curtainLeft;
     std::shared_ptr<SceneNode> curtainRight;
     float curtainOpen = 1.0f;
-    std::vector<std::shared_ptr<SceneNode>> dustMotes;
-    std::vector<float> dustAlphas;
-    std::vector<glm::vec3> dustState;
     std::vector<std::shared_ptr<SceneNode>> beamShafts;
     std::vector<float> beamAlphas;
     float currentDaylight = 1.0f;

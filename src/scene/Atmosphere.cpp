@@ -12,7 +12,6 @@
 namespace {
 
 constexpr float twoPi = 6.2831853f;
-constexpr float pi = 3.14159265f;
 const glm::vec3 windowOrigin(0.0f, 2.2f, -3.0f);
 
 glm::mat4 translation(float x, float y, float z) {
@@ -23,7 +22,7 @@ float beamLength(const glm::vec3& direction) {
     if (direction.y >= -0.01f) {
         return 6.0f;
     }
-    return std::min(6.0f, 2.2f / -direction.y);
+    return std::min(9.0f, 2.2f / -direction.y);
 }
 
 glm::mat4 beamRotation(const glm::vec3& direction) {
@@ -39,6 +38,14 @@ glm::mat4 beamRotation(const glm::vec3& direction) {
                      axisY.x, axisY.y, axisY.z, 0.0f,
                      axisZ.x, axisZ.y, axisZ.z, 0.0f,
                      0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+glm::vec3 sideVector(const glm::vec3& direction) {
+    glm::vec3 side = glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+    if (glm::length(side) < 0.001f) {
+        return glm::vec3(1.0f, 0.0f, 0.0f);
+    }
+    return glm::normalize(side);
 }
 
 }
@@ -86,47 +93,33 @@ void updateZParticles(const std::vector<std::shared_ptr<SceneNode>>& particles,
     }
 }
 
-void updateDust(const std::vector<std::shared_ptr<SceneNode>>& motes,
-                const std::vector<glm::vec3>& state, std::vector<float>& alphas,
-                float elapsedTime, const glm::vec3& beamDirection,
-                float daylight, float curtainOpen) {
-    const float length = beamLength(beamDirection);
-
-    glm::vec3 side = glm::cross(beamDirection, glm::vec3(0.0f, 1.0f, 0.0f));
-    if (glm::length(side) < 0.001f) {
-        side = glm::vec3(1.0f, 0.0f, 0.0f);
-    }
-    side = glm::normalize(side);
-    const glm::vec3 other = glm::normalize(glm::cross(side, beamDirection));
-
-    for (size_t i = 0; i < motes.size(); ++i) {
-        const float phase = std::fmod(elapsedTime * 0.12f + state[i].y, 1.0f);
-        const float sway = std::sin(phase * twoPi + state[i].y * 9.0f) * 0.08f;
-        const float lift = std::cos(phase * twoPi + state[i].y * 7.0f) * 0.05f;
-
-        const glm::vec3 position = windowOrigin + beamDirection * (phase * length) +
-                                   side * (state[i].x + sway) + other * lift;
-        const float scale = state[i].z * (0.7f + 0.3f * std::sin(phase * pi));
-
-        motes[i]->setLocalMatrix(glm::translate(glm::mat4(1.0f), position) *
-                                 glm::scale(glm::mat4(1.0f), glm::vec3(scale)));
-        motes[i]->updateWorld(glm::mat4(1.0f));
-
-        alphas[i] = 0.55f * std::sin(phase * pi) * daylight * curtainOpen;
-    }
-}
-
 void updateSunbeams(const std::vector<std::shared_ptr<SceneNode>>& shafts,
                     std::vector<float>& alphas, const glm::vec3& beamDirection,
-                    float daylight, float curtainOpen) {
-    const float length = beamLength(beamDirection);
-    const glm::mat4 rotation = beamRotation(beamDirection);
-    const glm::vec3 center = windowOrigin + beamDirection * (length * 0.5f);
+                    const glm::vec3& rayColor, float rayStrength, float curtainOpen) {
+    const glm::vec3 side = sideVector(beamDirection);
+    const float count = static_cast<float>(shafts.size());
 
     for (size_t i = 0; i < shafts.size(); ++i) {
-        shafts[i]->setLocalMatrix(glm::translate(glm::mat4(1.0f), center) * rotation *
-                                  glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, length, 1.0f)));
-        alphas[i] = (0.075f - static_cast<float>(i) * 0.02f) * daylight * curtainOpen;
+        const float t = count > 1.0f
+            ? 2.0f * static_cast<float>(i) / (count - 1.0f) - 1.0f
+            : 0.0f;
+        const float middle = 1.0f - std::abs(t);
+
+        const glm::vec3 direction = glm::normalize(beamDirection + side * (t * 0.045f));
+        const glm::vec3 origin = windowOrigin + side * (t * 0.62f) +
+                                 glm::vec3(0.0f, middle * 0.05f, 0.0f);
+        const float reach = beamLength(direction);
+        const glm::vec3 center = origin + direction * (reach * 0.5f);
+
+        const float width = (0.85f + 0.45f * middle) * (0.9f + 0.1f * rayStrength);
+        const float depth = 0.35f + 0.15f * middle;
+
+        shafts[i]->setLocalMatrix(glm::translate(glm::mat4(1.0f), center) *
+                                  beamRotation(-direction) *
+                                  glm::scale(glm::mat4(1.0f), glm::vec3(width, reach, depth)));
+        shafts[i]->setColorMultiplier(rayColor);
+
+        alphas[i] = 0.12f * (1.0f - 0.40f * std::abs(t)) * rayStrength * curtainOpen;
     }
 }
 

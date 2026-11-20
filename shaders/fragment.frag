@@ -97,6 +97,12 @@ void main() {
 
     albedo = applyPattern(albedo, worldPosition, textureUV);
 
+    if (uPattern == 6) {
+        float fade = mix(0.55f, 1.0f, textureUV.y);
+        fragmentColor = vec4(albedo * 2.0f * fade, uAlpha);
+        return;
+    }
+
     vec3 color = ambientColor * material.ambient * albedo;
     color += applyLight(normal, viewDirection, normalize(-windowLight.direction),
                         windowLight.color * windowLight.intensity, albedo);
