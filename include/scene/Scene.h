@@ -13,6 +13,7 @@
 struct SceneOptions {
     bool lampOn = true;
     bool rainOn = true;
+    bool curtainsClosed = false;
     bool flicker = false;
     bool ballRolling = false;
     float ballSpeed = 1.6f;
@@ -44,6 +45,12 @@ private:
     std::shared_ptr<SceneNode> plantLeaf;
     std::shared_ptr<SceneNode> rainRoot;
     std::shared_ptr<SceneNode> steamRoot;
+    std::shared_ptr<SceneNode> curtainLeft;
+    std::shared_ptr<SceneNode> curtainRight;
+    float curtainOpen = 1.0f;
+    std::vector<std::shared_ptr<SceneNode>> dustMotes;
+    std::vector<float> dustAlphas;
+    std::vector<glm::vec3> dustState;
     std::vector<std::shared_ptr<SceneNode>> rainDrops;
     std::vector<std::shared_ptr<SceneNode>> steamPuffs;
     std::vector<glm::vec3> rainState;

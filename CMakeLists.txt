@@ -48,6 +48,7 @@ add_executable(cozy_room
     src/gfx/Mesh.cpp
     src/gfx/Shader.cpp
     src/gfx/Texture.cpp
+    src/scene/Atmosphere.cpp
     src/scene/Camera.cpp
     src/scene/DayNight.cpp
     src/scene/Lighting.cpp

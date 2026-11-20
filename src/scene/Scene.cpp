@@ -7,6 +7,7 @@
 #include <glad/gl.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "scene/Atmosphere.h"
 #include "scene/DayNight.h"
 #include "scene/Primitives.h"
 #include "scene/Room.h"
@@ -53,6 +54,12 @@ Scene::Scene() {
     root->addChild(makeNode(Room::createFloor(), glm::mat4(1.0f), 1));
     root->addChild(makeNode(Room::createWalls(), glm::mat4(1.0f), 2));
     root->addChild(makeNode(Room::createWindowFrame(), glm::mat4(1.0f), 0));
+
+    curtainLeft = makeNode(createCube({0.8f, 1.9f, 0.06f}, glm::vec3(0.9f, 0.82f, 0.78f)),
+                           translation(-1.25f, 2.2f, -2.9f));
+    curtainRight = makeNode(createCube({0.8f, 1.9f, 0.06f}, glm::vec3(0.9f, 0.82f, 0.78f)),
+                            translation(1.25f, 2.2f, -2.9f));
+    root->addChild(curtainLeft); root->addChild(curtainRight);
 
     sun = makeNode(createSphere(0.55f, 20, 14, glm::vec3(1.0f, 0.9f, 0.55f)),
                    translation(-2.2f, 1.4f, -9.0f), 0, false,
@@ -148,6 +155,14 @@ Scene::Scene() {
         zParticles.push_back(zParticle);
         zPhases.push_back(static_cast<float>(i) / 3.0f);
         zAlphas.push_back(0.0f);
+    }
+
+    for (int i = 0; i < 16; ++i) {
+        dustMotes.push_back(makeNode(createSphere(0.024f, 8, 6,
+                                                  glm::vec3(1.0f, 0.95f, 0.75f)),
+                                     glm::mat4(1.0f)));
+        dustState.push_back(glm::vec3(-0.75f + (i % 4) * 0.5f, static_cast<float>(i) * 0.37f, 0.7f + (i % 3) * 0.25f));
+        dustAlphas.push_back(0.0f);
     }
 
     bed->addChild(sleepingCat);
@@ -419,27 +434,11 @@ void Scene::update(float deltaTime, float elapsedTime, Lighting& lighting,
     plantLeaf->setLocalMatrix(translation(0.22f, 1.02f, 0.0f) * rotationY(leafAngle) *
                               scaled(1.0f, 0.35f, 0.6f));
 
-    for (size_t i = 0; i < rainDrops.size(); ++i) {
-        if (!options.rainOn) {
-            rainDrops[i]->setLocalMatrix(scaled(0.0f, 0.0f, 0.0f));
-            continue;
-        }
-
-        float y = rainState[i].y - rainState[i].z * deltaTime;
-        if (y < 1.25f) {
-            y = 3.25f;
-        }
-        rainState[i].y = y;
-        rainDrops[i]->setLocalMatrix(translation(rainState[i].x, y, -3.12f));
-    }
-
-    for (size_t i = 0; i < steamPuffs.size(); ++i) {
-        const float phase = std::fmod(elapsedTime * 0.35f + steamState[i].y, 0.7f);
-        const float y = 1.28f + phase;
-        const float scale = 1.0f - phase * 0.55f;
-        steamPuffs[i]->setLocalMatrix(translation(steamState[i].x, y, 0.0f) *
-                                      scaled(scale, scale, scale));
-    }
+    updateCurtains(curtainOpen, options.curtainsClosed, deltaTime, curtainLeft, curtainRight);
+    lighting.windowLight.intensity *= 0.35f + 0.65f * curtainOpen;
+    updateDust(dustMotes, dustState, dustAlphas, elapsedTime, lightingDaylight, curtainOpen);
+    updateRain(rainDrops, rainState, options.rainOn, deltaTime);
+    updateSteam(steamPuffs, steamState, elapsedTime);
 
     root->updateWorld(glm::mat4(1.0f));
 
@@ -496,5 +495,6 @@ void Scene::drawParticles(const Shader& shader, const Texture& texture) const {
         shader.setFloat("uAlpha", zAlphas[i]);
         zParticles[i]->draw(shader, texture);
     }
+    drawDust(shader, texture, dustMotes, dustAlphas);
     glDepthMask(GL_TRUE);
 }

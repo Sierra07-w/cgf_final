@@ -66,6 +66,14 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
     if (key == GLFW_KEY_B) {
         sceneOptions.ballRolling = !sceneOptions.ballRolling;
     }
+
+    if (key == GLFW_KEY_R) {
+        sceneOptions.rainOn = !sceneOptions.rainOn;
+    }
+
+    if (key == GLFW_KEY_C) {
+        sceneOptions.curtainsClosed = !sceneOptions.curtainsClosed;
+    }
 }
 
 void mouseButtonCallback(GLFWwindow*, int button, int action, int) {
@@ -121,6 +129,7 @@ void buildUi(GLFWwindow* window) {
     ImGui::Text("Scene");
 
     ImGui::Checkbox("Rain", &sceneOptions.rainOn);
+    ImGui::Checkbox("Curtains", &sceneOptions.curtainsClosed);
     ImGui::Checkbox("Desk lamp", &sceneOptions.lampOn);
     ImGui::Checkbox("Lamp flicker", &sceneOptions.flicker);
     ImGui::Checkbox("Day / night", &sceneOptions.dayNightOn);
@@ -197,7 +206,8 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
-    std::cout << "Tab: camera mode, F5: control panel, Esc: exit" << std::endl;
+    std::cout << "Tab: camera mode, F5: panel, R: rain, C: curtains, B: ball, Esc: exit"
+              << std::endl;
 
     {
         const std::string shaderPath = std::string(SHADER_DIR);
