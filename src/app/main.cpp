@@ -145,6 +145,7 @@ void buildUi(GLFWwindow* window, Scene& scene) {
         if (ImGui::SliderFloat("Time", &hours, 0.0f, 24.0f, "%.1f h")) {
             sceneOptions.dayTime = hours / 24.0f;
         }
+        ImGui::TextDisabled("6h sunrise, 12h noon, 18h sunset");
     }
 
     if (ImGui::Button(sceneOptions.ballRolling ? "Stop ball" : "Roll ball")) {
