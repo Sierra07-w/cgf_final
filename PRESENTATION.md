@@ -1,70 +1,45 @@
 # Cozy Room Diorama - Presentation
 
+Simple English (B1). 14 slides with speaker notes.
+
 ## Slide 1 - Title
-Cozy Room Diorama
-A small 3D cartoon room that lives through one full day.
-C++17 - OpenGL - GLFW - ImGui
+Cozy Room Diorama. Final project for Computer Graphics. C++17, OpenGL, GLFW, ImGui.
 
 ## Slide 2 - The idea
-We wanted a warm, cozy bedroom.
-The sun should move during the day.
-Light should come through the window.
-The light path inside the room should be clear.
-At night the lamp should become important.
+Warm room. Living time. Visible light. Night lamp. We wanted the viewer to feel the day.
 
-## Slide 3 - The room
-Room size: 6 x 6 x 4 meters.
-Wooden floor and cream walls.
-Bed, blanket and a small white cat.
-Desk, chair, bookshelf and plant.
-Lamp, mug, yoga mat and dumbbells.
-Low-poly 3D cartoon style.
+## Slide 3 - What you see
+3D room, ImGui panel, FPS counter. The mouse rotates the camera.
 
-## Slide 4 - Day and night
-The sun moves from left to right.
-The sky changes from light blue to dark blue.
-Day speed changes the speed of the day.
-When the cycle is off, use the Time slider.
-6 h sunrise, 12 h noon, 18 h sunset.
+## Slide 4 - The room
+6 x 6 x 4 m. Bed, cat, desk, bookshelf, plant, lamp, mat, dumbbells, ball, rain, curtains.
 
-## Slide 5 - The sun rays
-Nine wide golden light bands.
-They start across the whole window.
-They fan out into the room.
-They touch the floor, bed, carpet and furniture.
-No dust, smoke, fog or particles.
+## Slide 5 - Day and night
+6 h sunrise, 12 h noon, 18 h sunset, 24 h night. One number controls sun, sky and rays.
 
-## Slide 6 - Rays during the day
-Morning: low angle, pale yellow light.
-Noon: higher angle, brightest light.
-Evening: low angle, warm orange light.
-Night: no rays at all.
-Next morning: rays slowly come back.
+## Slide 6 - Time controls
+Day/night on: auto cycle and Day speed. Off: Time slider 0-24 h with a hint.
 
-## Slide 7 - Controls
-F5 - show or hide the panel.
-Tab - change camera mode.
-B - roll the ball.
-R - rain on or off.
-C - curtains open or closed.
-L - desk lamp on or off.
-Esc - exit.
+## Slide 7 - The sun rays
+Nine bands, 3 x 3 grid, open shape, no dust or particles.
 
-## Slide 8 - Technical part
-C++17 and OpenGL 3.3 Core.
-Scene.cpp builds and updates the scene.
-DayNight.cpp computes sun and colours.
-Atmosphere.cpp updates effects and rays.
-fragment.frag has the light and ray mode.
-The FPS counter is always visible.
+## Slide 8 - Rays during the day
+Morning pale, noon bright, evening orange, night no rays.
 
-## Slide 9 - Result
-Cozy cartoon room with furniture and a cat.
-Full day and night cycle.
-Time slider and lamp key.
-Wide golden rays from the whole window.
-Report and presentation are in the project folder.
+## Slide 9 - Every key
+Tab camera, F5 panel, B ball, R rain, C curtains, L lamp, Esc exit.
 
-## Slide 10 - Thank you
-Thank you for watching.
-Questions?
+## Slide 10 - Panel controls
+Rain, Curtains, Desk lamp, Lamp flicker, Day/night, Day speed, Time, Roll ball.
+
+## Slide 11 - Under the hood
+Scene.cpp, DayNight.cpp, Atmosphere.cpp, Primitives.cpp, fragment.frag, main.cpp.
+
+## Slide 12 - What was difficult
+Closed cone spot, missing world matrix, bookshelf outside the room.
+
+## Slide 13 - Result
+Cozy room, full cycle, nine rays, keys and panel. Shadow mapping not implemented.
+
+## Slide 14 - Thank you
+Thank you for watching. Questions?
