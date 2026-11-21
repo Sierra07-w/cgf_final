@@ -19,6 +19,7 @@ struct SceneOptions {
     float ballSpeed = 1.6f;
     bool dayNightOn = true;
     float dayCycleSpeed = 0.04f;
+    float dayTime = 0.29f;
     glm::vec3 lampOffset = glm::vec3(0.0f);
 };
 
@@ -35,6 +36,7 @@ public:
     void pokeCat();
     bool isCatGrowling() const;
     float getDaylight() const;
+    float getTimeOfDay() const;
 
 private:
     std::shared_ptr<SceneNode> root;
@@ -42,7 +44,7 @@ private:
     float ballPhase = 0.0f;
     std::shared_ptr<SceneNode> lampShade;
     std::shared_ptr<SceneNode> sun;
-    float sunPhase = 0.25f;
+    float sunPhase = 0.2513f;
     std::shared_ptr<SceneNode> plantLeaf;
     std::shared_ptr<SceneNode> rainRoot;
     std::shared_ptr<SceneNode> steamRoot;

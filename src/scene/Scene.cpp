@@ -416,6 +416,8 @@ void Scene::update(float deltaTime, float elapsedTime, Lighting& lighting,
 
     updateZParticles(zParticles, zPhases, zAlphas, elapsedTime, calm);
 
+    if (!options.dayNightOn) sunPhase = (options.dayTime - 0.25f) * 6.2831853f;
+
     glm::vec3 beamDirection(0.0f, -1.0f, 0.0f);
     glm::vec3 rayColor(1.0f);
     float rayStrength = 0.0f;
@@ -481,6 +483,11 @@ void Scene::draw(const Shader& shader, const Texture& texture) const {
 
 float Scene::getDaylight() const {
     return currentDaylight;
+}
+
+float Scene::getTimeOfDay() const {
+    const float turns = sunPhase / 6.2831853f + 0.25f;
+    return turns - std::floor(turns);
 }
 
 void Scene::drawParticles(const Shader& shader, const Texture& texture) const {

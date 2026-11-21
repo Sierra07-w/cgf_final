@@ -74,6 +74,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
     if (key == GLFW_KEY_C) {
         sceneOptions.curtainsClosed = !sceneOptions.curtainsClosed;
     }
+
+    if (key == GLFW_KEY_L) {
+        sceneOptions.lampOn = !sceneOptions.lampOn;
+    }
 }
 
 void mouseButtonCallback(GLFWwindow*, int button, int action, int) {
@@ -112,7 +116,7 @@ void scrollCallback(GLFWwindow*, double, double yOffset) {
     camera.zoom(static_cast<float>(yOffset));
 }
 
-void buildUi(GLFWwindow* window) {
+void buildUi(GLFWwindow* window, Scene& scene) {
     if (!showPanel) {
         return;
     }
@@ -133,7 +137,15 @@ void buildUi(GLFWwindow* window) {
     ImGui::Checkbox("Desk lamp", &sceneOptions.lampOn);
     ImGui::Checkbox("Lamp flicker", &sceneOptions.flicker);
     ImGui::Checkbox("Day / night", &sceneOptions.dayNightOn);
-    ImGui::SliderFloat("Day speed", &sceneOptions.dayCycleSpeed, 0.01f, 0.2f);
+    if (sceneOptions.dayNightOn) {
+        sceneOptions.dayTime = scene.getTimeOfDay();
+        ImGui::SliderFloat("Day speed", &sceneOptions.dayCycleSpeed, 0.01f, 0.2f);
+    } else {
+        float hours = sceneOptions.dayTime * 24.0f;
+        if (ImGui::SliderFloat("Time", &hours, 0.0f, 24.0f, "%.1f h")) {
+            sceneOptions.dayTime = hours / 24.0f;
+        }
+    }
 
     if (ImGui::Button(sceneOptions.ballRolling ? "Stop ball" : "Roll ball")) {
         sceneOptions.ballRolling = !sceneOptions.ballRolling;
@@ -288,7 +300,7 @@ int main() {
                             deltaTime);
             }
 
-            buildUi(window);
+            buildUi(window, scene);
 
             const ImGuiIO& fpsIo = ImGui::GetIO();
             const float fps = fpsIo.Framerate;
