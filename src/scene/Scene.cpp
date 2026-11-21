@@ -200,7 +200,7 @@ Scene::Scene() {
     root->addChild(chair);
 
     auto bookshelf = std::make_shared<SceneNode>();
-    bookshelf->setLocalMatrix(translation(-2.65f, 0.0f, -2.35f));
+    bookshelf->setLocalMatrix(translation(-2.25f, 0.0f, -2.35f));
 
     bookshelf->addChild(makeNode(createCube({0.12f, 2.4f, 0.6f}, glm::vec3(0.72f, 0.54f, 0.38f)),
                                  translation(-0.6f, 1.2f, 0.0f)));
