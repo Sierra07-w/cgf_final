@@ -213,7 +213,7 @@ MeshData createLightBand(const glm::vec3& color) {
     const float topHalfDepth = 0.12f;
     const float bottomHalfWidth = 0.50f;
     const float bottomHalfDepth = 0.18f;
-    const glm::vec3 dim = color * 0.65f;
+    const glm::vec3 dim = color * 0.35f;
     const glm::vec3 frontNormal(0.0f, 0.0f, 1.0f);
     const glm::vec3 backNormal(0.0f, 0.0f, -1.0f);
 
@@ -226,6 +226,7 @@ MeshData createLightBand(const glm::vec3& color) {
     data.vertices.push_back({{ bottomHalfWidth, -0.5f, bottomHalfDepth}, frontNormal, {1.0f, 0.0f}, dim});
     data.vertices.push_back({{ bottomHalfWidth, -0.5f, -bottomHalfDepth}, backNormal, {1.0f, 0.0f}, dim});
     data.vertices.push_back({{-bottomHalfWidth, -0.5f, -bottomHalfDepth}, backNormal, {0.0f, 0.0f}, dim});
+    data.vertices.push_back({{0.0f, -0.5f, 0.0f}, backNormal, {0.5f, 0.5f}, color});
 
     data.indices.push_back(0); data.indices.push_back(1); data.indices.push_back(5);
     data.indices.push_back(0); data.indices.push_back(5); data.indices.push_back(4);
@@ -241,6 +242,11 @@ MeshData createLightBand(const glm::vec3& color) {
 
     data.indices.push_back(0); data.indices.push_back(1); data.indices.push_back(2);
     data.indices.push_back(0); data.indices.push_back(2); data.indices.push_back(3);
+
+    data.indices.push_back(4); data.indices.push_back(5); data.indices.push_back(8);
+    data.indices.push_back(5); data.indices.push_back(6); data.indices.push_back(8);
+    data.indices.push_back(6); data.indices.push_back(7); data.indices.push_back(8);
+    data.indices.push_back(7); data.indices.push_back(4); data.indices.push_back(8);
 
     return data;
 }

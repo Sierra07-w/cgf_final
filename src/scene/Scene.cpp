@@ -157,7 +157,7 @@ Scene::Scene() {
         zAlphas.push_back(0.0f);
     }
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 9; ++i) {
         beamShafts.push_back(makeNode(createLightBand(glm::vec3(1.0f, 0.97f, 0.88f)),
                                       glm::mat4(1.0f), 6));
         beamAlphas.push_back(0.0f);

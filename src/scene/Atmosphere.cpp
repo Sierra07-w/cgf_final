@@ -18,8 +18,8 @@ glm::mat4 translation(float x, float y, float z) {
     return glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
 }
 
-float beamLength(const glm::vec3& direction) {
-    const float floorReach = direction.y < -0.01f ? 2.2f / -direction.y : 6.0f;
+float beamLength(const glm::vec3& direction, float originY) {
+    const float floorReach = direction.y < -0.01f ? originY / -direction.y : 6.0f;
     const float wallReach = direction.z > 0.01f
         ? (2.85f - windowOrigin.z) / direction.z
         : 6.0f;
@@ -39,14 +39,6 @@ glm::mat4 beamRotation(const glm::vec3& direction) {
                      axisY.x, axisY.y, axisY.z, 0.0f,
                      axisZ.x, axisZ.y, axisZ.z, 0.0f,
                      0.0f, 0.0f, 0.0f, 1.0f);
-}
-
-glm::vec3 sideVector(const glm::vec3& direction) {
-    glm::vec3 side = glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f));
-    if (glm::length(side) < 0.001f) {
-        return glm::vec3(1.0f, 0.0f, 0.0f);
-    }
-    return glm::normalize(side);
 }
 
 }
@@ -97,23 +89,20 @@ void updateZParticles(const std::vector<std::shared_ptr<SceneNode>>& particles,
 void updateSunbeams(const std::vector<std::shared_ptr<SceneNode>>& shafts,
                     std::vector<float>& alphas, const glm::vec3& beamDirection,
                     const glm::vec3& rayColor, float rayStrength, float curtainOpen) {
-    const glm::vec3 side = sideVector(beamDirection);
-    const float count = static_cast<float>(shafts.size());
-
     for (size_t i = 0; i < shafts.size(); ++i) {
-        const float t = count > 1.0f
-            ? 2.0f * static_cast<float>(i) / (count - 1.0f) - 1.0f
-            : 0.0f;
-        const float middle = 1.0f - std::abs(t);
+        const float across = static_cast<float>(static_cast<int>(i % 3) - 1);
+        const float height = static_cast<float>(static_cast<int>(i / 3) - 1);
+        const float middle = 1.0f - std::abs(across);
 
-        const glm::vec3 direction = glm::normalize(beamDirection + side * (t * 0.045f));
-        const glm::vec3 origin = windowOrigin + side * (t * 0.62f) +
-                                 glm::vec3(0.0f, middle * 0.05f, 0.0f);
-        const float reach = beamLength(direction);
+        const glm::vec3 direction = glm::normalize(
+            beamDirection + glm::vec3(across * 0.055f, height * 0.015f, 0.0f));
+        const glm::vec3 origin = windowOrigin +
+                                 glm::vec3(across * 0.72f, height * 0.65f, 0.0f);
+        const float reach = beamLength(direction, origin.y);
         const glm::vec3 center = origin + direction * (reach * 0.5f);
 
-        const float width = (0.85f + 0.45f * middle) * (0.9f + 0.1f * rayStrength);
-        const float depth = 0.35f + 0.15f * middle;
+        const float width = (0.78f + 0.28f * middle) * (0.9f + 0.1f * rayStrength);
+        const float depth = 0.30f + 0.10f * middle;
 
         shafts[i]->setLocalMatrix(glm::translate(glm::mat4(1.0f), center) *
                                   beamRotation(-direction) *
@@ -121,7 +110,7 @@ void updateSunbeams(const std::vector<std::shared_ptr<SceneNode>>& shafts,
         shafts[i]->setColorMultiplier(rayColor);
         shafts[i]->updateWorld(glm::mat4(1.0f));
 
-        alphas[i] = 0.14f * (1.0f - 0.40f * std::abs(t)) * rayStrength * curtainOpen;
+        alphas[i] = 0.09f * (0.8f + 0.2f * middle) * rayStrength * curtainOpen;
     }
 }
 
