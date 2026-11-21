@@ -32,7 +32,7 @@ float updateDayNight(float& phase, float deltaTime, bool enabled, float speed,
     sun->setLocalMatrix(glm::translate(glm::mat4(1.0f),
                                        glm::vec3(sunX, sunY, -3.8f)));
 
-    const glm::vec3 virtualSun(sunX * 0.25f, 3.0f + elevation, -4.2f);
+    const glm::vec3 virtualSun(sunX * 0.25f, 3.1f + elevation * 0.5f, -5.0f);
     const glm::vec3 toSun = glm::normalize(virtualSun - windowOrigin);
     beamDirection = -toSun;
 

@@ -12,17 +12,18 @@
 namespace {
 
 constexpr float twoPi = 6.2831853f;
-const glm::vec3 windowOrigin(0.0f, 2.2f, -3.0f);
+const glm::vec3 windowOrigin(0.0f, 2.2f, -2.92f);
 
 glm::mat4 translation(float x, float y, float z) {
     return glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
 }
 
 float beamLength(const glm::vec3& direction) {
-    if (direction.y >= -0.01f) {
-        return 6.0f;
-    }
-    return std::min(9.0f, 2.2f / -direction.y);
+    const float floorReach = direction.y < -0.01f ? 2.2f / -direction.y : 6.0f;
+    const float wallReach = direction.z > 0.01f
+        ? (2.85f - windowOrigin.z) / direction.z
+        : 6.0f;
+    return std::min(9.0f, std::min(floorReach, wallReach));
 }
 
 glm::mat4 beamRotation(const glm::vec3& direction) {
@@ -118,8 +119,9 @@ void updateSunbeams(const std::vector<std::shared_ptr<SceneNode>>& shafts,
                                   beamRotation(-direction) *
                                   glm::scale(glm::mat4(1.0f), glm::vec3(width, reach, depth)));
         shafts[i]->setColorMultiplier(rayColor);
+        shafts[i]->updateWorld(glm::mat4(1.0f));
 
-        alphas[i] = 0.12f * (1.0f - 0.40f * std::abs(t)) * rayStrength * curtainOpen;
+        alphas[i] = 0.14f * (1.0f - 0.40f * std::abs(t)) * rayStrength * curtainOpen;
     }
 }
 

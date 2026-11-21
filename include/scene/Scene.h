@@ -42,7 +42,7 @@ private:
     float ballPhase = 0.0f;
     std::shared_ptr<SceneNode> lampShade;
     std::shared_ptr<SceneNode> sun;
-    float sunPhase = 0.5f;
+    float sunPhase = 0.25f;
     std::shared_ptr<SceneNode> plantLeaf;
     std::shared_ptr<SceneNode> rainRoot;
     std::shared_ptr<SceneNode> steamRoot;
