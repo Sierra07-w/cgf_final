@@ -99,8 +99,9 @@ cmake --build build
 
 ## Documents
 
-- [REPORT.md](REPORT.md) — a short project report in simple English.
-- [PRESENTATION.md](PRESENTATION.md) — slide text for the presentation in simple English.
+- [REPORT.docx](REPORT.docx) - the project report in simple English.
+- [PRESENTATION.pptx](PRESENTATION.pptx) - the presentation in simple English.
+- [REPORT.md](REPORT.md) and [PRESENTATION.md](PRESENTATION.md) - plain text versions.
 
 ## AI Use
 
