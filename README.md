@@ -97,6 +97,11 @@ cmake --build build
 | Mouse | Look around in Free mode |
 | Esc | Exit |
 
+## Documents
+
+- [REPORT.md](REPORT.md) — a short project report in simple English.
+- [PRESENTATION.md](PRESENTATION.md) — slide text for the presentation in simple English.
+
 ## AI Use
 
 We used an AI assistant for this project. The tool was OpenCode (Big Pickle).
@@ -107,7 +112,7 @@ The AI helped us to:
 - write the FPS counter, the day/night cycle, the nine cartoon sun-ray bands, the curtains, the sky colour and the build fix;
 - add keys for rain and curtains;
 - move the day/night and atmosphere code into their own files;
-- write this README.
+- write this README, the report and the presentation.
 
 We checked all changes. We built the project and ran it. We tested the controls. We made all design choices ourselves.
 
